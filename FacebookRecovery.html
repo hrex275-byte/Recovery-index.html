@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facebook Recovery</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,sans-serif;}
+body{background:#fff;color:#000;}
+
+/* Login Screen */
+#loginScreen{display:block;text-align:center;margin-top:80px;padding:20px;}
+.fb-logo{font-size:80px;color:#1877f2;font-weight:bold;margin-bottom:40px;}
+.input-field{width:100%;max-width:340px;padding:14px 16px;margin:10px auto;border:1px solid #dddfe2;border-radius:6px;font-size:17px;display:block;}
+.btn-login{width:100%;max-width:340px;padding:14px;background:#1877f2;color:#fff;border:none;border-radius:6px;font-weight:bold;font-size:18px;margin:12px auto;cursor:pointer;display:block;}
+.forgot-link{color:#1877f2;font-size:15px;margin:8px 0 30px;cursor:pointer;}
+.btn-newacc{width:100%;max-width:340px;padding:14px;background:#42b72a;color:#fff;border:none;border-radius:6px;font-weight:bold;font-size:18px;margin:0 auto;cursor:pointer;display:block;}
+.error-text{color:#e74c3c;font-size:16px;margin-top:8px;display:none;}
+
+/* Loading Screen */
+#loadingScreen{display:none;text-align:center;margin-top:120px;padding:20px;}
+.load-text{font-size:20px;color:#333;}
+.wait-text{font-size:16px;color:#666;margin-top:12px;}
+
+/* Profile Screen */
+#homeScreen{display:none;}
+.top-bar{background:#1877f2;color:#fff;padding:16px;font-size:22px;font-weight:bold;}
+
+/* Cover & Profile */
+.cover{width:100%;height:180px;background:#ddd;position:relative;overflow:hidden;}
+.cover-img{width:100%;height:100%;object-fit:cover;}
+.cover-camera{position:absolute;bottom:12px;right:12px;width:42px;height:42px;border-radius:50%;background:#e9e9e9;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border:2px solid white;}
+
+.profile-box{position:relative;margin-top:-50px;margin-left:16px;width:100px;height:100px;}
+.profile-circle{width:100px;height:100px;border-radius:50%;border:4px solid #fff;object-fit:cover;}
+.profile-camera{position:absolute;bottom:-4px;right:-4px;width:38px;height:38px;border-radius:50%;background:#e9e9e9;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:2px solid white;}
+
+#fileInput, #coverFileInput, #photoFile1, #photoFile2, #photoFile3, #photoFile4, #photoFile5, #photoFile6{display:none;}
+
+.profile-name{font-size:24px;font-weight:bold;margin:12px 16px 4px;}
+.profile-friends-count{font-size:16px;color:#555;margin:0 16px 16px;}
+
+/* Buttons */
+.btn-row{display:flex;gap:10px;padding:0 16px 16px;}
+.btn-story{flex:1;padding:12px;background:#1877f2;color:#fff;border:none;border-radius:6px;font-weight:bold;font-size:16px;}
+.btn-edit{flex:1;padding:12px;background:#e9e9eb;color:#000;border:none;border-radius:6px;font-weight:bold;font-size:16px;}
+
+/* Tabs: All / Photos / Reels */
+.tabs{display:flex;border-bottom:1px solid #ddd;}
+.tab{flex:1;text-align:center;padding:14px;font-size:18px;cursor:pointer;}
+.tab.active{color:#1877f2;border-bottom:3px solid #1877f2;font-weight:bold;}
+
+/* Section Titles */
+.section-title{font-size:22px;font-weight:bold;margin:20px 16px 12px;}
+
+/* Personal Details */
+.detail-item{display:flex;align-items:center;margin:10px 16px;font-size:17px;}
+.detail-icon{margin-right:12px;font-size:20px;}
+
+/* About Section */
+.about-box{margin:0 16px 20px;padding:14px;background:#f7f8fa;border-radius:8px;}
+
+/* Friends Section */
+.friends-row{display:flex;gap:12px;margin:0 16px 20px;overflow-x:auto;padding-bottom:8px;}
+.friend-item{text-align:center;width:85px;}
+.friend-pic{width:70px;height:70px;border-radius:50%;background:#ddd;object-fit:cover;}
+.friend-name{font-size:14px;margin-top:4px;}
+
+/* Photo Grid with camera */
+.photo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:0 16px 20px;}
+.photo-item{aspect-ratio:1/1;background:#ddd;border-radius:6px;position:relative;overflow:hidden;}
+.photo-img{width:100%;height:100%;object-fit:cover;}
+.photo-cam{position:absolute;bottom:6px;right:6px;width:32px;height:32px;border-radius:50%;background:#e9e9e9;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border:2px solid white;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="fb-logo">f</div>
+  <input type="text" class="input-field" id="inputUser" placeholder="Mobile number or email address">
+  <input type="password" class="input-field" id="inputPass" placeholder="Password">
+  <p class="error-text" id="errorMsg">inputy your email or password!</p>
+  <button class="btn-login" onclick="checkLogin()">Log In</button>
+  <div class="forgot-link">Forgot password?</div>
+  <button class="btn-newacc">Create New Account</button>
+</div>
+
+<div id="loadingScreen">
+  <div class="fb-logo">f</div>
+  <p class="load-text">Your account is reactivaed</p>
+  <p class="wait-text">Please wait about 30 minutes…</p>
+</div>
+
+<div id="homeScreen">
+  <div class="top-bar">Facebook</div>
+
+  <div class="cover">
+    <img id="coverImg" class="cover-img" src="https://imagetourl.cloud/pmfsp7sxdx9b.jpg" alt="Cover">
+    <div class="cover-camera" id="changeCover">📷</div>
+    <input type="file" id="coverFileInput" accept="image/*">
+  </div>
+
+  <div class="profile-box">
+    <img id="profilePic" class="profile-circle" src="https://imagetourl.cloud/pmfsp7sxdx9b.jpg" alt="Profile">
+    <div class="profile-camera" id="changePic">📷</div>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <div class="profile-name">pangalan</div>
+  <div class="profile-friends-count">ilan ang friend</div>
+
+  <div class="btn-row">
+    <button class="btn-story"> Add to story</button>
+    <button class="btn-edit">Edit profile</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active">All</div>
+    <div class="tab">Photos</div>
+    <div class="tab">Reels</div>
+  </div>
+
+  <!-- Personal Details -->
+  <div class="section-title">Personal details</div>
+  <div class="detail-item">
+    <span class="detail-icon"></span>
+    <span>location</span>
+  </div>
+  <div class="detail-item">
+    <span class="detail-icon"></span>
+    <span>birthmonth</span>
+  </div>
+
+  <!-- About Section -->
+  <div class="section-title">About</div>
+  <div class="about-box">
+    <p>****</p>
+  </div>
+
+  <!-- Friends Section -->
+  <div class="section-title">Friends</div>
+  
+
+  <!-- Photo Grid with camera buttons -->
+  <div class="section-title">Photos</div>
+  <div class="photo-grid">
+    <div class="photo-item">
+      <img id="p1" class="photo-img" src="" alt="Photo">
+      <div class="photo-cam" id="cam1">📷</div>
+      <input type="file" id="photoFile1" accept="image/*">
+    </div>
+    <div class="photo-item">
+      <img id="p2" class="photo-img" src="" alt="Photo">
+      <div class="photo-cam" id="cam2">📷</div>
+      <input type="file" id="photoFile2" accept="image/*">
+    </div>
+    <div class="photo-item">
+      <img id="p3" class="photo-img" src="" alt="Photo">
+      <div class="photo-cam" id="cam3">📷</div>
+      <input type="file" id="photoFile3" accept="image/*">
+    </div>
+    <div class="photo-item">
+      <img id="p4" class="photo-img" src="" alt="Photo">
+      <div class="photo-cam" id="cam4">📷</div>
+      <input type="file" id="photoFile4" accept="image/*">
+    </div>
+    <div class="photo-item">
+      <img id="p5" class="photo-img" src="" alt="Photo">
+      <div class="photo-cam" id="cam5">📷</div>
+      <input type="file" id="photoFile5" accept="image/*">
+    </div>
+    <div class="photo-item">
+      <img id="p6" class="photo-img" src="" alt="Photo">
+      <div class="photo-cam" id="cam6">📷</div>
+      <input type="file" id="photoFile6" accept="image/*">
+    </div>
+  </div>
+</div>
+
+<script>
+// Check kung may email at password
+function checkLogin(){
+  const user = document.getElementById("inputUser").value;
+  const pass = document.getElementById("inputPass").value;
+  const error = document.getElementById("errorMsg");
+  if(user === "" || pass === ""){
+    error.style.display = "block";
+    return;
+  }
+  error.style.display = "none";
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("loadingScreen").style.display = "block";
+  setTimeout(()=>{
+    document.getElementById("loadingScreen").style.display = "none";
+    document.getElementById("homeScreen").style.display = "block";
+  }, 2500);
+}
+
+// Profile picture
+const picBtn = document.getElementById("changePic");
+const fileSel = document.getElementById("fileInput");
+const profileImg = document.getElementById("profilePic");
+picBtn.addEventListener("click", ()=>{fileSel.click();});
+fileSel.addEventListener("change", (e)=>{
+  const f = e.target.files[0];
+  if(f){
+    const r = new FileReader();
+    r.onload = ev=>{profileImg.src = ev.target.result;};
+    r.readAsDataURL(f);
+  }
+});
+
+// Cover photo
+const coverBtn = document.getElementById("changeCover");
+const coverFileSel = document.getElementById("coverFileInput");
+const coverImg = document.getElementById("coverImg");
+coverBtn.addEventListener("click", ()=>{coverFileSel.click();});
+coverFileSel.addEventListener("change", (e)=>{
+  const f = e.target.files[0];
+  if(f){
+    const r = new FileReader();
+    r.onload = ev=>{coverImg.src = ev.target.result;};
+    r.readAsDataURL(f);
+  }
+});
+
+// Photo 1
+document.getElementById("cam1").addEventListener("click",()=>document.getElementById("photoFile1").click());
+document.getElementById("photoFile1").addEventListener("change",(e)=>{
+  const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>document.getElementById("p1").src=ev.target.result;r.readAsDataURL(f);}
+});
+// Photo 2
+document.getElementById("cam2").addEventListener("click",()=>document.getElementById("photoFile2").click());
+document.getElementById("photoFile2").addEventListener("change",(e)=>{
+  const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>document.getElementById("p2").src=ev.target.result;r.readAsDataURL(f);}
+});
+// Photo 3
+document.getElementById("cam3").addEventListener("click",()=>document.getElementById("photoFile3").click());
+document.getElementById("photoFile3").addEventListener("change",(e)=>{
+  const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>document.getElementById("p3").src=ev.target.result;r.readAsDataURL(f);}
+});
+// Photo 4
+document.getElementById("cam4").addEventListener("click",()=>document.getElementById("photoFile4").click());
+document.getElementById("photoFile4").addEventListener("change",(e)=>{
+  const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>document.getElementById("p4").src=ev.target.result;r.readAsDataURL(f);}
+});
+// Photo 5
+document.getElementById("cam5").addEventListener("click",()=>document.getElementById("photoFile5").click());
+document.getElementById("photoFile5").addEventListener("change",(e)=>{
+  const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>document.getElementById("p5").src=ev.target.result;r.readAsDataURL(f);}
+});
+// Photo 6
+document.getElementById("cam6").addEventListener("click",()=>document.getElementById("photoFile6").click());
+document.getElementById("photoFile6").addEventListener("change",(e)=>{
+  const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>document.getElementById("p6").src=ev.target.result;r.readAsDataURL(f);}
+});
+</script>
+</body>
+</html>
